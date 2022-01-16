@@ -2,6 +2,9 @@ package hanabi
 
 import "fmt"
 
+// 卡片颜色种类
+var colors []CardColor = []CardColor{RED, GREEN, WHITE, YELLOW, BLUE}
+
 // 游戏面板
 type Board struct {
 	// 所有的卡片，在玩家抽取后会逐渐减少，当没有卡片时则重新洗牌
@@ -15,7 +18,7 @@ type Board struct {
 	// 参加玩家
 	players []*Player
 	// 已存在的提示信息, {玩家名: { 卡牌index: 卡牌信息 } }
-	hint map[string]map[int]Card
+	hints map[string]map[int]Card
 }
 
 // 初始化游戏
@@ -29,8 +32,6 @@ func (b *Board) Init() {
 	fmt.Println("End init board...")
 }
 
-// 卡片颜色种类
-var colors []CardColor = []CardColor{RED, GREEN, WHITE, YELLOW, BLUE}
 
 // 初始化所有卡片
 func (b *Board) initCards() {
@@ -103,7 +104,7 @@ func (b *Board) Start() {
 func (b Board) Print() {
 	fmt.Println()
 	fmt.Println("==============================================================")
-	fmt.Printf("牌堆数量：%v, 提示牌数量：%v, 生命牌数量：%v，\n当前hanabi：%v\n已知提示信息：%v\n", len(b.cards), b.noteTokensNum, b.stormTokensNum, b.hanabi, b.hint)
+	fmt.Printf("牌堆数量：%v, 提示牌数量：%v, 生命牌数量：%v，\n当前hanabi：%v\n已知提示信息：%v\n", len(b.cards), b.noteTokensNum, b.stormTokensNum, b.hanabi, b.hints)
 	for _, p := range b.players {
 		p.Print()
 	}

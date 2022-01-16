@@ -9,12 +9,12 @@ import (
 type CardColor string
 
 const (
-	RED     = "红"
-	GREEN   = "绿"
-	WHITE   = "白"
-	YELLOW  = "黄"
-	BLUE    = "蓝"
-	UNKNOWN = "未知"
+	RED     CardColor = "红"
+	GREEN   CardColor = "绿"
+	WHITE   CardColor = "白"
+	YELLOW  CardColor = "黄"
+	BLUE    CardColor = "蓝"
+	UNKNOWN CardColor = "未知"
 )
 
 type Card struct {
