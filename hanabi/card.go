@@ -6,14 +6,15 @@ import (
 )
 
 // 卡牌颜色
-type CardColor int
+type CardColor string
 
 const (
-	RED    = iota
-	GREEN  = iota
-	WHITE  = iota
-	YELLOW = iota
-	BLUE   = iota
+	RED     = "红"
+	GREEN   = "绿"
+	WHITE   = "白"
+	YELLOW  = "黄"
+	BLUE    = "蓝"
+	UNKNOWN = "未知"
 )
 
 type Card struct {
