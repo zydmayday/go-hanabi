@@ -14,12 +14,14 @@ type Board struct {
 	// 生命指示牌
 	stormTokensNum int
 	// 用户完成的hanabi
-	hanabi map[CardColor]int
+	hanabi Hanabi
 	// 参加玩家
 	players []*Player
 	// 已存在的提示信息, {玩家名: { 卡牌index: 卡牌信息 } }
 	hints map[string]map[int]Card
 }
+
+type Hanabi map[CardColor]int
 
 // 初始化游戏
 func (b *Board) Init() {
@@ -28,10 +30,10 @@ func (b *Board) Init() {
 	b.stormTokensNum = 3
 	b.initCards()
 	b.cards.Shuffle()
+	b.initHint()
 	b.initHanabi()
 	fmt.Println("End init board...")
 }
-
 
 // 初始化所有卡片
 func (b *Board) initCards() {
@@ -55,12 +57,31 @@ func (b *Board) initHanabi() {
 	}
 }
 
+// 初始化hint
+func (b *Board) initHint() {
+	b.hints = map[string]map[int]Card{}
+}
+
+// 牌堆是否有剩余牌
+func (b Board) hasCardLeft() bool {
+	return len(b.cards) > 0
+}
+
 // 发牌
 func (b *Board) deal(p *Player) {
 	// 选取牌堆最上方一张牌，发给玩家
 	var c Card = b.cards[0]
 	fmt.Printf("给玩家(%v)发牌：%v\n", p.Name, c)
 	p.cards = append(p.cards, c)
+	b.cards = b.cards[1:]
+}
+
+// 发牌
+func (b *Board) dealWithIdx(p *Player, idx int) {
+	// 选取牌堆最上方一张牌，发给玩家
+	var c Card = b.cards[0]
+	fmt.Printf("给玩家(%v)发牌：%v\n", p.Name, c)
+	p.cards[idx] = c
 	b.cards = b.cards[1:]
 }
 
@@ -99,6 +120,82 @@ func (b *Board) Start() {
 			3.2 增加一枚提示指示牌（上限为8枚）
 			3.3 给玩家补牌
 	*/
+	round := 0
+	for !b.isOver(){
+		for _, p := range b.players {
+			round++
+			fmt.Println("-------------------------------")
+			fmt.Printf("----------- 第%v回合 -----------\n", round)
+			fmt.Println("-------------------------------")
+			if b.isOver() {
+				break
+			}
+			if !b.hasCardLeft() {
+				b.initCards()
+			}
+			p.Play()
+			b.Print()
+		}
+	}
+	fmt.Printf("游戏结束! 一共经历%v回合\n", round)
+	b.Print()
+}
+
+// 增加提示指示物
+func (b *Board) increaseNoteTokenSum() {
+	if b.noteTokensNum < 8 {
+		b.noteTokensNum++
+	}
+}
+
+func (b Board) HasNoteToken() bool {
+	return b.noteTokensNum > 0
+}
+
+// 玩家打出手牌，board检查并处理
+func (b *Board) ReceiveCard(p *Player, idx int) {
+	/*
+		1. 判断该手牌是否有效，如果有效，则
+			1.1 加入hanabi
+			1.2 增加提示指示物
+		2. 如果无效，则
+			2.1 扣除生命指示物
+		3 移除hints相关信息
+		4 给玩家发牌
+	*/
+	c := p.cards[idx]
+	if b.CanAddToHanabi(c) {
+		b.hanabi[c.color]++
+		b.increaseNoteTokenSum()
+	} else {
+		b.stormTokensNum--
+	}
+	delete(b.hints[p.Name], idx)
+	b.dealWithIdx(p, idx)
+}
+
+// board收到提示
+func (b *Board) ReceiveHint(name string, idx int, card Card) {
+	_, ok := b.hints[name]
+	if !ok {
+		b.hints[name] = map[int]Card{}
+	}
+	b.hints[name][idx] = card
+	b.noteTokensNum--
+}
+
+// 该牌是否可以加入最终的hanabi
+func (b Board) CanAddToHanabi(card Card) bool {
+	h, ok := b.hanabi[card.color]
+	if ok {
+		return h == card.number-1
+	}
+	return false
+}
+
+// 游戏终止条件
+func (b Board) isOver() bool {
+	return b.stormTokensNum <= 0
 }
 
 func (b Board) Print() {

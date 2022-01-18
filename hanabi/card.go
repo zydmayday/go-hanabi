@@ -32,3 +32,8 @@ func (c Cards) Shuffle() Cards {
 	})
 	return c
 }
+
+// 卡牌是否包含所有信息
+func (c Card) HasFullInfo() bool {
+	return c.color != UNKNOWN && c.number > 0
+}
